@@ -1,0 +1,30 @@
+--- 
+    - hosts: test1 
+      become: true  
+      tasks:
+       - name: to create pv and vg #first u have to make pv and vg to make lv
+         lvg:
+                vg: vg1 #here u can give any name for vg
+                pvs: /dev/sdc #this should be your disk path located in /dev/ . you can see that disk in lsblk
+       - name: to create lv
+         lvol:
+                vg: vg1
+                lv: lv1 #here u can give any name for lv
+                size: 2G #here u can give any size for lv. make sure this size is not more than your vg size
+                pvs: /dev/sdc
+       - name: to give filesystem
+         filesystem:
+                fstype: ext4 
+                dev: /dev/vg1/lv1 #this is your vg and lv path. you have to give file system for your lv to mount that. 
+       - name: making directory to mount lv
+         file:
+                path: /home/test/lvm #this is the destination where you want to mount your lv.
+                state: directory
+                mode: 755 #this will give permission to your directory
+       - name: to mount
+         mount: #this moudle used for permanent mount
+                path: /home/test/lvm    
+                src: /dev/vg1/lv1       
+                fstype: ext4
+                opts: defaults  
+                state: mounted  
